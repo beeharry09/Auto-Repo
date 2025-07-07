@@ -1,0 +1,25 @@
+name: Create Repo Daily
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # Setiap hari jam 00:00 UTC
+
+jobs:
+  create-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set repo name
+        id: vars
+        run: echo "REPO_NAME=auto-repo-$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
+      - name: Create repo via GitHub API
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.PAT }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/user/repos \
+            -d '{
+              "name": "'${REPO_NAME}'",
+              "description": "Auto-created on $(date +'%Y-%m-%d')",
+              "private": false
+            }'
